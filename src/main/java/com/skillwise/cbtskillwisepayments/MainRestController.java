@@ -1,10 +1,9 @@
 package com.skillwise.cbtskillwisepayments;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
@@ -13,6 +12,16 @@ import java.util.List;
 @RequestMapping("/api/1.1")
 public class MainRestController
 {
+
+    @Autowired
+    OrderRepository orderRepository;
+
+    @Autowired
+    ProductOfferRepository productOfferRepository;
+
+    @Autowired
+    PaymentrecordRepository paymentrecordRepository;
+
      @GetMapping("getall/order")
      public String getAllOrders()
     {
@@ -24,5 +33,36 @@ public class MainRestController
         return response.getBody();
 
     }
+
+    @PostMapping("acceptorder")
+    public Order acceptOrder(@RequestParam("offerid") Integer offerid, @RequestParam("orderid") Integer orderid ) throws Exception
+    {
+        if(  orderRepository.findById(orderid).isPresent() )
+        {
+            productOfferRepository.updateStatusByIdEquals(offerid, orderid);
+
+            Paymentrecord paymentrecord = new Paymentrecord();
+
+            Integer tempId = (int) (Math.random()*10000);
+
+            paymentrecord.setId(tempId);
+            paymentrecord.setOfferid(offerid);
+            paymentrecord.setSellername(productOfferRepository.findById(offerid).get().getUsername());
+            paymentrecord.setBuyername(orderRepository.findById(orderid).get().getUsername());
+            paymentrecord.setAmount(orderRepository.findById(orderid).get().getBid());
+
+            paymentrecordRepository.save(paymentrecord);
+
+
+            return orderRepository.findById(orderid).get();
+
+        }
+        else
+        {
+            throw new Exception();
+        }
+    }
+
+
 
 }
