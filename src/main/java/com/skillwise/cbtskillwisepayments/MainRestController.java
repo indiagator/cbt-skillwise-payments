@@ -1,6 +1,8 @@
 package com.skillwise.cbtskillwisepayments;
 
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +31,9 @@ public class MainRestController
         RestTemplate restTemplate = new RestTemplate();
         String url = "http://localhost:8092/api/1.1/getall/order";
         ResponseEntity<String> response = restTemplate.getForEntity(url,String.class);
+
+        Logger logger = LogManager.getLogger(MainRestController.class);
+        logger.info("all order feteched");
 
         return response.getBody();
 
